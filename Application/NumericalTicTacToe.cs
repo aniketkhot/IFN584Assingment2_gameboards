@@ -1,6 +1,5 @@
 ﻿using System.Text.Json;
 
-
 namespace BoardGamesFramework
 {
     public class NumericalTicTacToe : GameBase
@@ -29,8 +28,7 @@ namespace BoardGamesFramework
 
         public void Reset()
         {
-            for (int i = 0; i < 9; i++)
-                Board[i] = null;
+            for (int i = 0; i < 9; i++) Board[i] = null;
             UsedNumbers.Clear();
             UndoStack.Clear();
             RedoStack.Clear();
@@ -44,27 +42,19 @@ namespace BoardGamesFramework
 
         public override bool IsValidMove(Move move)
         {
-            if (!(move is NTTMove m))
-                return false;
-            if (m.Position < 0 || m.Position >= 9)
-                return false;
-            if (Board[m.Position].HasValue)
-                return false;
-            if (UsedNumbers.Contains(m.NumberPlaced))
-                return false;
-            if (CurrentPlayer == Player1 && m.NumberPlaced % 2 == 0)
-                return false;
-            if (CurrentPlayer == Player2 && m.NumberPlaced % 2 == 1)
-                return false;
+            if (move is not NTTMove m) return false;
+            if (m.Position < 0 || m.Position >= 9) return false;
+            if (Board[m.Position].HasValue) return false;
+            if (UsedNumbers.Contains(m.NumberPlaced)) return false;
+            if (CurrentPlayer == Player1 && m.NumberPlaced % 2 == 0) return false;
+            if (CurrentPlayer == Player2 && m.NumberPlaced % 2 == 1) return false;
             return true;
         }
 
         public override void MakeMove(Move move)
         {
-            if (!(move is NTTMove m))
-                throw new ArgumentException("Invalid move type");
-            if (!IsValidMove(m))
-                throw new InvalidOperationException("Invalid move");
+            if (move is not NTTMove m) { Console.WriteLine("Invalid move type."); return; }
+            if (!IsValidMove(m)) { Console.WriteLine("Invalid move."); return; }
 
             Board[m.Position] = m.NumberPlaced;
             UsedNumbers.Add(m.NumberPlaced);
@@ -123,7 +113,6 @@ namespace BoardGamesFramework
                     }
                 }
             }
-            // Check draw
             if (Board.All(p => p.HasValue))
             {
                 gameOverFlag = true;
@@ -136,12 +125,8 @@ namespace BoardGamesFramework
             Console.WriteLine();
             for (int i = 0; i < 9; i++)
             {
-                if (Board[i].HasValue)
-                    Console.Write(Board[i].Value.ToString().PadLeft(2));
-                else
-                    Console.Write(" .");
-                if ((i + 1) % 3 == 0)
-                    Console.WriteLine();
+                Console.Write(Board[i].HasValue ? Board[i].Value.ToString().PadLeft(2) : " .");
+                if ((i + 1) % 3 == 0) Console.WriteLine();
             }
             Console.WriteLine();
         }
@@ -167,11 +152,7 @@ namespace BoardGamesFramework
 
         public override bool Load(string filePath)
         {
-            if (!File.Exists(filePath))
-            {
-                Console.WriteLine("Save file not found.");
-                return false;
-            }
+            if (!File.Exists(filePath)) { Console.WriteLine("File not found."); return false; }
             try
             {
                 var json = File.ReadAllText(filePath);
@@ -186,10 +167,8 @@ namespace BoardGamesFramework
                 CurrentPlayer = data.CurrentPlayerName == Player1.Name ? Player1 : Player2;
                 UndoStack.Clear();
                 RedoStack.Clear();
-                foreach (var m in data.UndoMoves)
-                    UndoStack.Push(m);
-                foreach (var m in data.RedoMoves)
-                    RedoStack.Push(m);
+                foreach (var m in data.UndoMoves) UndoStack.Push(m);
+                foreach (var m in data.RedoMoves) RedoStack.Push(m);
                 gameOverFlag = false;
                 winner = null;
                 CheckGameOver();
@@ -211,11 +190,10 @@ namespace BoardGamesFramework
             clone.CurrentPlayer = this.CurrentPlayer;
             clone.gameOverFlag = this.gameOverFlag;
             clone.winner = this.winner;
-            // Note: Undo/Redo stacks not cloned here
+            // Note: Undo/Redo stacks not cloned intentionally for simplicity.
             return clone;
         }
 
-        // Helper class for serialization
         private class NumericalTicTacToeSave
         {
             public int?[] Board { get; set; }

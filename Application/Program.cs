@@ -26,7 +26,6 @@ public class Program
 
         IGame game = GameFactory.Create(choice, p1, p2);
 
-
         if (game == null)
         {
             Console.WriteLine("Invalid game choice.");
@@ -54,11 +53,7 @@ public class Program
                     {
                         if (game is NumericalTicTacToe nt)
                         {
-                            if (parts.Length != 3)
-                            {
-                                Console.WriteLine("Usage: move position(0-8) number(1-9)");
-                                continue;
-                            }
+                            if (parts.Length <= 2) { Console.WriteLine("Invalid input format."); continue; }
                             if (!int.TryParse(parts[1], out int pos) || !int.TryParse(parts[2], out int num))
                             {
                                 Console.WriteLine("Invalid numbers.");
@@ -68,11 +63,7 @@ public class Program
                         }
                         else if (game is Notakto ntk)
                         {
-                            if (parts.Length != 3)
-                            {
-                                Console.WriteLine("Usage: move boardIndex(0-2) position(0-8)");
-                                continue;
-                            }
+                            if (parts.Length <= 2) { Console.WriteLine("Invalid input format."); continue; }
                             if (!int.TryParse(parts[1], out int bIdx) || !int.TryParse(parts[2], out int pos))
                             {
                                 Console.WriteLine("Invalid numbers.");
@@ -82,11 +73,7 @@ public class Program
                         }
                         else if (game is Gomoku gm)
                         {
-                            if (parts.Length != 3)
-                            {
-                                Console.WriteLine($"Usage: move x(0-{gm.BoardSize - 1}) y(0-{gm.BoardSize - 1})");
-                                continue;
-                            }
+                            if (parts.Length <= 2) { Console.WriteLine("Invalid input format."); continue; }
                             if (!int.TryParse(parts[1], out int x) || !int.TryParse(parts[2], out int y))
                             {
                                 Console.WriteLine("Invalid numbers.");
@@ -95,7 +82,7 @@ public class Program
                             char piece = game.CurrentPlayer == game.Player1 ? 'X' : 'O';
                             move = new GomokuMove(x, y, piece);
                         }
-                        if (!game.IsValidMove(move))
+                        if (move == null || !game.IsValidMove(move))
                         {
                             Console.WriteLine("Invalid move.");
                             continue;
@@ -107,49 +94,28 @@ public class Program
                         Console.WriteLine("Error: " + ex.Message);
                     }
                 }
-                else if (cmd == "undo")
-                {
-                    game.Undo();
-                }
-                else if (cmd == "redo")
-                {
-                    game.Redo();
-                }
+                else if (cmd == "undo") game.Undo();
+                else if (cmd == "redo") game.Redo();
                 else if (cmd == "save")
                 {
-                    if (parts.Length != 2)
-                    {
-                        Console.WriteLine("Usage: save filename");
-                        continue;
-                    }
+                    if (parts.Length <= 1) { Console.WriteLine("Invalid input format."); continue; }
                     game.Save(parts[1]);
                 }
                 else if (cmd == "load")
                 {
-                    if (parts.Length != 2)
-                    {
-                        Console.WriteLine("Usage: load filename");
-                        continue;
-                    }
+                    if (parts.Length <= 1) { Console.WriteLine("Invalid input format."); continue; }
                     game.Load(parts[1]);
                 }
-                else if (cmd == "help")
-                {
-                    ShowHelp(game);
-                }
+                else if (cmd == "help") ShowHelp(game);
                 else if (cmd == "exit")
                 {
                     Console.WriteLine("Exiting...");
                     return;
                 }
-                else
-                {
-                    Console.WriteLine("Unknown command. Type help for commands.");
-                }
+                else Console.WriteLine("Unknown command. Type help for commands.");
             }
             else
             {
-                // Computer player's turn
                 var move = game.CurrentPlayer.GetMove(game);
                 if (move == null)
                 {
@@ -161,30 +127,21 @@ public class Program
         }
 
         game.DisplayBoard();
-        if (game.Winner != null)
-            Console.WriteLine($"Game Over! Winner: {game.Winner.Name}");
-        else
-            Console.WriteLine("Game Over! It's a draw.");
-
+        Console.WriteLine(game.Winner != null ? $"Game Over! Winner: {game.Winner.Name}" : "Game Over! It's a draw.");
         Console.WriteLine("Press any key to exit...");
         Console.ReadKey();
-
     }
+
     public static void ShowHelp(IGame game)
     {
         Console.WriteLine("Commands:");
         if (game is NumericalTicTacToe)
-        {
             Console.WriteLine("move pos(0-8) number(1-9) - place your number");
-        }
         else if (game is Notakto)
-        {
             Console.WriteLine("move boardIndex(0-2) position(0-8) - place X");
-        }
         else if (game is Gomoku gm)
-        {
             Console.WriteLine($"move x(0-{gm.BoardSize - 1}) y(0-{gm.BoardSize - 1}) - place piece");
-        }
+
         Console.WriteLine("undo - undo last move");
         Console.WriteLine("redo - redo last undone move");
         Console.WriteLine("save filename - save game");
@@ -193,6 +150,4 @@ public class Program
         Console.WriteLine("exit - exit game");
         Console.WriteLine();
     }
-
 }
-

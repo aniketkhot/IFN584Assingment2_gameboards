@@ -1,15 +1,16 @@
 ﻿namespace BoardGamesFramework
 {
-    // ----- Numerical Tic Tac Toe Implementation -----
-
     public class NTTMove : Move
     {
         public int Position { get; set; }
         public int NumberPlaced { get; set; }
-        public NTTMove(int pos, int num)
+
+        public NTTMove() { } 
+
+        public NTTMove(int position, int numberPlaced)
         {
-            Position = pos;
-            NumberPlaced = num;
+            Position = position;
+            NumberPlaced = numberPlaced;
         }
     }
 }

@@ -1,6 +1,5 @@
 ﻿using System.Text.Json;
 
-
 namespace BoardGamesFramework
 {
     public class Gomoku : GameBase
@@ -39,14 +38,10 @@ namespace BoardGamesFramework
 
         public override bool IsValidMove(Move move)
         {
-            if (!(move is GomokuMove m))
-                return false;
-            if (m.X < 0 || m.X >= BoardSize || m.Y < 0 || m.Y >= BoardSize)
-                return false;
-            if (Board[m.X, m.Y] != '.')
-                return false;
-            if (m.Piece != 'X' && m.Piece != 'O')
-                return false;
+            if (move is not GomokuMove m) return false;
+            if (m.X < 0 || m.X >= BoardSize || m.Y < 0 || m.Y >= BoardSize) return false;
+            if (Board[m.X, m.Y] != '.') return false;
+            if (m.Piece != 'X' && m.Piece != 'O') return false;
             if (CurrentPlayer == Player1 && m.Piece != 'X') return false;
             if (CurrentPlayer == Player2 && m.Piece != 'O') return false;
             return true;
@@ -54,10 +49,8 @@ namespace BoardGamesFramework
 
         public override void MakeMove(Move move)
         {
-            if (!(move is GomokuMove m))
-                throw new ArgumentException("Invalid move type");
-            if (!IsValidMove(m))
-                throw new InvalidOperationException("Invalid move");
+            if (move is not GomokuMove m) { Console.WriteLine("Invalid move type."); return; }
+            if (!IsValidMove(m)) { Console.WriteLine("Invalid move."); return; }
 
             Board[m.X, m.Y] = m.Piece;
             UndoStack.Push(move);
@@ -111,9 +104,7 @@ namespace BoardGamesFramework
             foreach (var dir in directions)
             {
                 int count = 1;
-                // check forward
                 count += CountInDirection(x, y, dir[0], dir[1], p);
-                // check backward
                 count += CountInDirection(x, y, -dir[0], -dir[1], p);
 
                 if (count >= 5)
@@ -123,7 +114,7 @@ namespace BoardGamesFramework
                     return;
                 }
             }
-            // Check for draw: no empty spots
+
             bool draw = true;
             for (int i = 0; i < BoardSize; i++)
                 for (int j = 0; j < BoardSize; j++)
@@ -190,11 +181,7 @@ namespace BoardGamesFramework
 
         public override bool Load(string filePath)
         {
-            if (!File.Exists(filePath))
-            {
-                Console.WriteLine("Save file not found.");
-                return false;
-            }
+            if (!File.Exists(filePath)) { Console.WriteLine("File not found."); return false; }
             try
             {
                 var json = File.ReadAllText(filePath);
@@ -209,13 +196,10 @@ namespace BoardGamesFramework
                 CurrentPlayer = data.CurrentPlayerName == Player1.Name ? Player1 : Player2;
                 UndoStack.Clear();
                 RedoStack.Clear();
-                foreach (var m in data.UndoMoves)
-                    UndoStack.Push(m);
-                foreach (var m in data.RedoMoves)
-                    RedoStack.Push(m);
+                foreach (var m in data.UndoMoves) UndoStack.Push(m);
+                foreach (var m in data.RedoMoves) RedoStack.Push(m);
                 gameOverFlag = false;
                 winner = null;
-                // No checkGameOver here, assume consistent save
                 Console.WriteLine($"Game loaded from {filePath}");
                 return true;
             }
@@ -233,6 +217,7 @@ namespace BoardGamesFramework
             clone.CurrentPlayer = this.CurrentPlayer;
             clone.gameOverFlag = this.gameOverFlag;
             clone.winner = this.winner;
+            // Note: Undo/Redo stacks not cloned intentionally for simplicity.
             return clone;
         }
 

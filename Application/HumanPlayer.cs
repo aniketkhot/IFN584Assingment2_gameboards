@@ -1,6 +1,5 @@
 ﻿namespace BoardGamesFramework
 {
-    // ----- Player Implementations -----
     public class HumanPlayer : Player
     {
         public HumanPlayer(string name)
@@ -11,80 +10,50 @@
 
         public override Move GetMove(IGame game)
         {
+            Console.WriteLine($"It's your turn, {Name}.");
+
             if (game is NumericalTicTacToe nt)
             {
-                Console.WriteLine($"{Name}, enter your move as: position(0-8) number(1-9)");
-                while (true)
+                Console.Write($"{Name}, enter your move as: position(0-8) number(1-9): ");
+                var parts = Console.ReadLine()?.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                if (parts == null || parts.Length <= 1) return null;
+                if (!int.TryParse(parts[0], out int pos) || !int.TryParse(parts[1], out int num))
                 {
-                    Console.Write("> ");
-                    var input = Console.ReadLine();
-                    var parts = input.Split(' ');
-                    if (parts.Length == 2 &&
-                        int.TryParse(parts[0], out int pos) &&
-                        int.TryParse(parts[1], out int num))
-                    {
-                        var move = new NTTMove(pos, num);
-                        if (nt.IsValidMove(move))
-                            return move;
-                        Console.WriteLine("Invalid move, try again.");
-                    }
-                    else
-                    {
-                        Console.WriteLine("Invalid input format.");
-                    }
+                    Console.WriteLine("Invalid input.");
+                    return null;
                 }
+                return new NTTMove(pos, num);
             }
+
             else if (game is Notakto ntk)
             {
-                Console.WriteLine($"{Name}, enter your move as: boardIndex(0-2) position(0-8)");
-                while (true)
+                Console.Write($"{Name}, enter your move as: boardIndex(0-2) position(0-8): ");
+                var parts = Console.ReadLine()?.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                if (parts == null || parts.Length <= 1) return null;
+                if (!int.TryParse(parts[0], out int boardIndex) || !int.TryParse(parts[1], out int pos))
                 {
-                    Console.Write("> ");
-                    var input = Console.ReadLine();
-                    var parts = input.Split(' ');
-                    if (parts.Length == 2 &&
-                        int.TryParse(parts[0], out int boardIndex) &&
-                        int.TryParse(parts[1], out int pos))
-                    {
-                        var move = new NotaktoMove(boardIndex, pos);
-                        if (ntk.IsValidMove(move))
-                            return move;
-                        Console.WriteLine("Invalid move, try again.");
-                    }
-                    else
-                    {
-                        Console.WriteLine("Invalid input format.");
-                    }
+                    Console.WriteLine("Invalid input.");
+                    return null;
                 }
+                return new NotaktoMove(boardIndex, pos);
             }
+
             else if (game is Gomoku gm)
             {
-                Console.WriteLine($"{Name}, enter your move as: x(0-{gm.BoardSize - 1}) y(0-{gm.BoardSize - 1})");
-                while (true)
+                Console.Write($"{Name}, enter your move as: x(0-{gm.BoardSize - 1}) y(0-{gm.BoardSize - 1}): ");
+                var parts = Console.ReadLine()?.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                if (parts == null || parts.Length <= 1) return null;
+                if (!int.TryParse(parts[0], out int x) || !int.TryParse(parts[1], out int y))
                 {
-                    Console.Write("> ");
-                    var input = Console.ReadLine();
-                    var parts = input.Split(' ');
-                    if (parts.Length == 2 &&
-                        int.TryParse(parts[0], out int x) &&
-                        int.TryParse(parts[1], out int y))
-                    {
-                        char piece = (game.CurrentPlayer == game.Player1) ? 'X' : 'O';
-                        var move = new GomokuMove(x, y, piece);
-                        if (gm.IsValidMove(move))
-                            return move;
-                        Console.WriteLine("Invalid move, try again.");
-                    }
-                    else
-                    {
-                        Console.WriteLine("Invalid input format.");
-                    }
+                    Console.WriteLine("Invalid input.");
+                    return null;
                 }
+                char piece = game.CurrentPlayer == game.Player1 ? 'X' : 'O';
+                return new GomokuMove(x, y, piece);
             }
-            else
-            {
-                throw new NotImplementedException("Unknown game type");
-            }
+
+            Console.WriteLine("Unsupported game type.");
+            return null;
         }
     }
 }
